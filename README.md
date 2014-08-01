@@ -1,4 +1,4 @@
-Can-t-Stop
+Can't Stop
 ==========
 
 HTML5 implementation of the game Can't Stop.
@@ -10,4 +10,5 @@ Work in progress. Things do be done:
 - play with other people over Internet?
 - AI play?
 
-[Play here](public_html/index.html)
+[Play here](http://users.telenet.be/Mark.Van.Peteghem/CantStop/)
+[Rules](http://www.yucata.de/en/Rules/CantStop)
