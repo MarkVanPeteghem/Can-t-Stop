@@ -12,6 +12,17 @@
     top: 10px;
 }
 
+#help {
+    position: relative;
+    left: 10px;
+}
+
+#error-message {
+    position: relative;
+    left: 10px;
+    height: 1em;
+}
+
 .button {
 	-moz-box-shadow:inset 0px 1px 11px 0px #bee2f9;
 	-webkit-box-shadow:inset 0px 1px 11px 0px #bee2f9;
