@@ -8,6 +8,7 @@ function SwitchPlayer(activePlayer) {
     $("span.combination").text("-");
     $("span.combination").removeClass("error");
     $("#error-message").text("");
+    $("#message").text("");
 
     $("#throw-dice").addClass("enabled");
     $("#clear-selection").removeClass("enabled");
@@ -44,6 +45,8 @@ $( document ).ready(function() {
     });
     
     $("#throw-dice").addClass("enabled");
+    
+    var blown = false;
 
     $("#throw-dice").click(function() {
         if (!$(this).hasClass("enabled"))
@@ -62,8 +65,12 @@ $( document ).ready(function() {
         }
         setTimeout(function(){
             if (!game.TryDice(dice)) {
-                $("#message").text("Busted!");
-                setTimeout(function(){ game.SwitchToNextPlayer(); $("#message").text(""); },2000);
+                $("#message").text("Blown!");
+                $("#apply").removeClass("enabled");
+                $("#throw-dice").removeClass("enabled");
+                $("#stop").addClass("enabled");
+                $("#clear-selection").removeClass("enabled");
+                blown = true;
             }
         }, NrRolls*150);
         for (var i=1; i<=4; ++i) {
@@ -158,7 +165,12 @@ $( document ).ready(function() {
         if (!$(this).hasClass("enabled"))
             return;
 
-        game.Stop();
+        if (!blown) {
+            game.Stop();
+        } else {
+            blown = false;
+            game.SwitchToNextPlayer();
+        }
     });
     
     $("html").keydown(function(event) {
