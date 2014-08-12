@@ -174,7 +174,6 @@ $( document ).ready(function() {
     });
     
     $("html").keydown(function(event) {
-        console.log(event.which);
         if (event.which>=97 && event.which<=102) {
             var number = event.which - 96;
             for (var i=1; i<=4; ++i) {
