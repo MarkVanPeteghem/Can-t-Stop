@@ -1,3 +1,27 @@
+describe("Markers", function() {
+    it("clones should behave independently", function() {
+        var markers1 = new Markers();
+        var markers2 = deepCopy(markers1);
+        
+        markers1.Advance([2], [0,0]);
+        markers2.Advance([3], [0,0]);
+        expect(markers1.IsColumnMarked(2)).toBeTruthy();
+        expect(markers1.IsColumnMarked(3)).toBeFalsy();
+        expect(markers2.IsColumnMarked(2)).toBeFalsy();
+        expect(markers2.IsColumnMarked(3)).toBeTruthy();
+    });
+
+    it("clones should behave independently", function() {
+        var markers1 = new Markers();
+        var markers2 = deepCopy(markers1);
+        
+        markers1.Advance([2], [0,0]);
+        markers2.Advance([2,2], [0,0]);
+        expect(markers1.GetMarkerHeight(0)).toBe(1);
+        expect(markers2.GetMarkerHeight(0)).toBe(2);
+    });
+});
+
 describe("GameState", function() {
     var gameState;
 
@@ -5,6 +29,7 @@ describe("GameState", function() {
     var scoreChangedCalled = false;
     var gameEndCalled = false;
     var playerSwitchCalled = false;
+    var errorCalled = "";
     beforeEach(function() {
         gameState = new GameState(2);
         markersMovedCalled = false;
@@ -15,6 +40,8 @@ describe("GameState", function() {
         gameState.AddOnGameEnd(function() { gameEndCalled = true; });
         playerSwitchCalled = false;
         gameState.AddOnPlayerSwitch(function() { playerSwitchCalled = true; });
+        errorCalled = "";
+        gameState.AddOnCombinationError(function(error) { errorCalled = error; });
     });
 
     it("should remember the number of players", function() {
@@ -405,15 +432,28 @@ describe("GameState", function() {
         expect(gameEndCalled).toBeFalsy();
     });
 
-    it("after failing with dice the correct callbacks should be called", function() {
+    it("after trying a good combination no callbacks should be called", function() {
         gameState.Advance([7,8,9]);
         markersMovedCalled = false;
-        gameState.TryDice([1,1,1,1]);
+        gameState.CanColumnCombinationBeUsed([7,8], []);
 
-        expect(markersMovedCalled).toBeTruthy();
-        expect(playerSwitchCalled).toBeTruthy();
+        expect(markersMovedCalled).toBeFalsy();
+        expect(playerSwitchCalled).toBeFalsy();
         expect(scoreChangedCalled).toBeFalsy();
         expect(gameEndCalled).toBeFalsy();
+        expect(errorCalled).toBe("");
+    });
+
+    it("after failing with a combination the correct callbacks should be called", function() {
+        gameState.Advance([7,8,9]);
+        markersMovedCalled = false;
+        gameState.CanColumnCombinationBeUsed([2], []);
+
+        expect(markersMovedCalled).toBeFalsy();
+        expect(playerSwitchCalled).toBeFalsy();
+        expect(scoreChangedCalled).toBeFalsy();
+        expect(gameEndCalled).toBeFalsy();
+        expect(errorCalled).toBe(CombinationErrors.ColumnIsNotMarked);
     });
 
     it("a game ends if one player has won three columns", function() {
