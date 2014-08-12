@@ -1,9 +1,5 @@
 "use strict";
 
-Array.prototype.clone = function() {
-	return this.slice(0);
-};
-
 function deepCopy(src, /* INTERNAL */ _visited) {
     if(src == null || typeof(src) !== 'object'){
         return src;
@@ -86,24 +82,22 @@ if (typeof object_create !== 'function') {
 }
 
 function Markers() {
-    this.columns = new Array();
-    this.heights = new Array();
+    this.markers = new Array();
     
     this.clear = function() {
-        this.columns = new Array();
-        this.heights = new Array();
+        this.markers = new Array();
     };
     
     this.GetNrMarkers = function() {
-        return this.columns.length;
+        return this.markers.length;
     };
     
     this.GetMarkerColumn = function(index) {
-        return this.columns[index];
+        return this.markers[index].column;
     };
     
     this.GetMarkerHeight = function(index) {
-        return this.heights[index];
+        return this.markers[index].height;
     };
     
     this.IsColumnMarked = function(column) {
@@ -111,15 +105,15 @@ function Markers() {
     };
     
     this.HasMarker = function(column, height) {
-        for (var i=0; i<this.columns.length; ++i)
-            if (this.columns[i]===column && this.heights[i]===height)
+        for (var i=0; i<this.markers.length; ++i)
+            if (this.markers[i].column===column && this.markers[i].height===height)
                 return true;
         return false;
     };
     
     this.GetMarkerIndex = function(column) {
-        for (var i=0; i<this.columns.length; ++i)
-            if (this.columns[i]===column)
+        for (var i=0; i<this.markers.length; ++i)
+            if (this.markers[i].column===column)
                 return i;
         return -1;
     };
@@ -128,10 +122,10 @@ function Markers() {
         for (var i=0; i<newColumns.length; ++i) {
             var column = newColumns[i];
             if (this.IsColumnMarked(column)) {
-                ++this.heights[this.GetMarkerIndex(column)];
+                var idx = this.GetMarkerIndex(column);
+                this.markers[idx].height = this.markers[idx].height+1;
             } else {
-                this.columns.push(column);
-                this.heights.push(positions[column-2]+1);
+                this.markers.push({column:column, height:positions[column-2]+1});
             }
         }
     };
