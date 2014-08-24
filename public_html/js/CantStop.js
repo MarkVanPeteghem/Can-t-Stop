@@ -81,6 +81,24 @@ if (typeof object_create !== 'function') {
     };
 }
 
+function fill(array, value) {
+    if (typeof value!=="function") {
+        for (var i=0; i<array.length; ++i) {
+            array[i] = value;
+        }
+    } else {
+        for (var i=0; i<array.length; ++i) {
+            array[i] = value(i);
+        }    
+    }
+}
+
+function fillWithClones(array, value) {
+    for (var i=0; i<array.length; ++i) {
+        array[i] = deepCopy(value);
+    }
+}
+
 function Markers() {
     this.markers = new Array();
     
@@ -135,21 +153,19 @@ function Markers() {
 
 function GameState(NrPlayers) {
     var playerPositions = new Array(NrPlayers);
-    for (var i=0; i<NrPlayers; ++i) {
-        playerPositions[i] = new Array(11);
-        for (var j=0; j<11; ++j) 
-            playerPositions[i][j] = -1;
-    }
+    fill(playerPositions, function(i) {
+        var arr = new Array(11);
+        fill(arr, -1);
+        return arr;
+    });
     
     var activePlayer = 0;
 
     var winnerOfColumn = new Array(11);
-    for (var i=0; i<12; ++i)
-        winnerOfColumn[i] = -1;
+    fill(winnerOfColumn, -1);
     
     var columnsWonByPlayer = new Array(NrPlayers);
-    for (var i=0; i<NrPlayers; ++i)
-        columnsWonByPlayer[i] = [];
+    fillWithClones(columnsWonByPlayer, []);
 
     var maxNrMarkers = 3;
     var markers = new Markers();
