@@ -101,14 +101,13 @@ function Markers() {
     };
     
     this.IsColumnMarked = function(column) {
-        return this.GetMarkerIndex(column) >= 0;
+        return this.GetMarkerOfColumn(column) !== undefined;
     };
     
     this.HasMarker = function(column, height) {
-        for (var i=0; i<this.markers.length; ++i)
-            if (this.markers[i].column===column && this.markers[i].height===height)
-                return true;
-        return false;
+        return _.some(this.markers, function(marker) {
+            return marker.column===column && marker.height===height;
+        });
     };
     
     this.GetMarkerIndex = function(column) {
@@ -118,16 +117,19 @@ function Markers() {
         return -1;
     };
     
+    this.GetMarkerOfColumn = function(column) {
+        return _.findWhere(this.markers, {column: column});
+    };
+    
     this.Advance = function(newColumns, positions) {
-        for (var i=0; i<newColumns.length; ++i) {
-            var column = newColumns[i];
+        _.each(newColumns, function(column) {
             if (this.IsColumnMarked(column)) {
-                var idx = this.GetMarkerIndex(column);
-                this.markers[idx].height = this.markers[idx].height+1;
+                var marker = this.GetMarkerOfColumn(column);
+                marker.height = marker.height+1;
             } else {
                 this.markers.push({column:column, height:positions[column-2]+1});
             }
-        }
+        }, this);
     };
 };
 
@@ -213,8 +215,8 @@ function GameState(NrPlayers) {
         return markers.HasMarker(column, height);
     };
     
-    this.GetMarkerIndex = function(column) {
-        return markers.GetMarkerIndex(column);
+    this.GetMarkerOfColumn = function(column) {
+        return markers.GetMarkerOfColumn(column);
     };
     
     this.AreAllMarkersUsed = function() {
@@ -265,8 +267,8 @@ function GameState(NrPlayers) {
         if (this.IsColumnWon(column))
             return false;
         if (markers.IsColumnMarked(column)) {
-            var marker = markers.GetMarkerIndex(column);
-            return markers.GetMarkerHeight(marker)+1 < this.GetColumnHeight(column);
+            var marker = this.GetMarkerOfColumn(column);
+            return marker.height+1 < this.GetColumnHeight(column);
         }
         
         // column is not won and not marked, so there have to be markers available
@@ -275,8 +277,8 @@ function GameState(NrPlayers) {
     
     this.HasUsableMarker = function(column) {
         if (markers.IsColumnMarked(column)) {
-            var marker = markers.GetMarkerIndex(column);
-            return markers.GetMarkerHeight(marker)+1 < this.GetColumnHeight(column);
+            var marker = this.GetMarkerOfColumn(column);
+            return marker.height+1 < this.GetColumnHeight(column);
         } else {
             return false;
         }
@@ -284,8 +286,8 @@ function GameState(NrPlayers) {
     
     this.HasUsableMarker2 = function(column) {
         if (markers.IsColumnMarked(column)) {
-            var marker = markers.GetMarkerIndex(column);
-            return markers.GetMarkerHeight(marker)+2 < this.GetColumnHeight(column);
+            var marker = this.GetMarkerOfColumn(column);
+            return marker.height+2 < this.GetColumnHeight(column);
         } else {
             return false;
         }
@@ -302,8 +304,8 @@ function GameState(NrPlayers) {
             if (this.IsColumnWon(column))
                 return CombinationErrors.ColumnsThatAreWonCannotBeUsed;
             if (markersTrial.IsColumnMarked(column)) {
-                var idx = markersTrial.GetMarkerIndex(column);
-                if (markersTrial.GetMarkerHeight(idx)===this.GetColumnHeight(column)-1)
+                var marker = markersTrial.GetMarkerOfColumn(column);
+                if (marker.height===this.GetColumnHeight(column)-1)
                     return CombinationErrors.ColumnIsAtMaximumHeight;
             } else {
                 if (markersTrial.GetNrMarkers()===maxNrMarkers)
@@ -317,8 +319,8 @@ function GameState(NrPlayers) {
                 var column = unusedDice[i]+unusedDice[j];
                 if (!this.IsColumnWon(column)) {
                     if (markersTrial.IsColumnMarked(column)) {
-                        var idx = markersTrial.GetMarkerIndex(column);
-                        if (markersTrial.GetMarkerHeight(idx)<this.GetColumnHeight(column)-1)
+                        var marker = markersTrial.GetMarkerOfColumn(column);
+                        if (marker.height<this.GetColumnHeight(column)-1)
                             return CombinationErrors.ColumnCanBeUsed;
                     } else {
                         if (markersTrial.GetNrMarkers()<maxNrMarkers)
